@@ -144,11 +144,6 @@
 
         <!-- Program Cards Grid -->
         <div id="programs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Loading State -->
-            <div id="loading-indicator" class="col-span-full text-center py-16">
-                <i data-lucide="loader" class="animate-spin w-12 h-12 mx-auto text-indigo-600"></i>
-                <p class="mt-4 text-lg text-gray-600">Loading programs from Google Sheet...</p>
-            </div>
             <!-- Program cards will be inserted here by JavaScript -->
         </div>
         
@@ -256,38 +251,7 @@
         }
 
         // --- UI and Data Functions ---
-
-        /**
-         * Parses CSV data from Google Sheets into an array of objects.
-         * This function is specifically tailored to the gviz CSV output format.
-         * @param {string} csv The raw CSV text.
-         * @returns {Array<Object>} An array of program objects.
-         */
-        function parseCSV(csv) {
-            // Filter out any blank lines that might exist in the sheet
-            const lines = csv.trim().split('\n').filter(line => line.trim() !== '');
-            
-            // If there are no lines or only a header, there's no data to show.
-            if (lines.length < 2) return [];
-
-            // The first line is the header. gviz format is "Field1","Field2",...
-            // So we remove the first and last quote, then split by ","
-            const headerLine = lines.shift();
-            const headers = headerLine.slice(1, -1).split('","');
-
-            // Process the rest of the lines
-            return lines.map(line => {
-                const values = line.slice(1, -1).split('","');
-                const entry = {};
-                headers.forEach((header, index) => {
-                    // Assign value to the corresponding header. Default to empty string if no value.
-                    entry[header] = values[index] || '';
-                });
-                return entry;
-            });
-        }
-
-
+        
         function createProgramCard(program) {
             const hasScholarship = program['Scholarship / Financial Aid Available?'] === 'Yes';
             const scholarshipBadgeClass = hasScholarship ? 'scholarship-badge' : 'no-scholarship-badge';
@@ -506,49 +470,1377 @@
         }
 
         // --- Initial Setup ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            const loadingIndicator = document.getElementById('loading-indicator');
-            lucide.createIcons(); // Render loading icon
-
-            // Fetch data from Google Sheet
-            try {
-                // The URL to fetch the Google Sheet as a CSV file.
-                // IMPORTANT: The Google Sheet must be shared with "Anyone with the link can view".
-                const sheetUrl = 'https://docs.google.com/spreadsheets/d/1vmpoAxWz7dI9UC0ibaK0N-LlR2ZmIf64hPnewAhQoks/gviz/tq?tqx=out:csv&sheet=Sheet1';
-                
-                const response = await fetch(sheetUrl);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok. Check sharing settings of the Google Sheet.');
+        document.addEventListener('DOMContentLoaded', () => {
+             // Data is now embedded directly with all 89 programs.
+            programsData = [
+                {
+                    "Program Name": "49ers STEM Leadership Institute",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "The 49ers STEM Leadership Institute (SLI) is a six-year program that prepares students with high academic potential to be college and career ready. Starting in the 7th grade and continuing through 12th grade, 60 students per year are selected to take part in a rigorous, STEM-intensive curriculum at our 49ers STEM Leadership Institute at Santa Clara's Cabrillo Middle School, and then at Santa Clara High School. ",
+                    "Age Group": "7th-12th Grade",
+                    "Cost": "Free",
+                    "Point of Contact": "Jesse Lovejoy",
+                    "Address": "4555 warts",
+                    "City": "Santa Clara",
+                    "Zip Code": "95051",
+                    "Email": "49ers.sli@49ers.com",
+                    "Phone Number": "",
+                    "Website": "https://www.49ers.com/community/our-programs/49ers-stem-leadership-institute"
+                },
+                {
+                    "Program Name": "Alpha Public Schools",
+                    "Extracurricular Category": "Academic Support",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Alpha Public Schools is a network of public charter schools serving the students of East San José. Alpha provides a rigorous and supportive academic environment to ensure that 100% of our students are prepared for college and a life of leadership.",
+                    "Age Group": "K-12",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "Multiple Locations",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "info@alphapublicschools.org",
+                    "Phone Number": "(408) 583-4876",
+                    "Website": "https://www.alphapublicschools.org/"
+                },
+                {
+                    "Program Name": "Reading Partners",
+                    "Extracurricular Category": "Academic Support",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Reading Partners is a national education nonprofit that works with elementary schools to support students who are reading below grade level. Our program provides one-on-one tutoring to help students build foundational reading skills.",
+                    "Age Group": "K-4th Grade",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "Multiple School Sites",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "volunteer@readingpartners.org",
+                    "Phone Number": "(408) 945-5700",
+                    "Website": "https://readingpartners.org/location/silicon-valley/"
+                },
+                {
+                    "Program Name": "Breakthrough Silicon Valley",
+                    "Extracurricular Category": "Academic Support",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Breakthrough Silicon Valley provides a six-year, tuition-free program for high-achieving, motivated middle and high school students from under-resourced communities. We provide academic enrichment, leadership development, and preparation for college.",
+                    "Age Group": "6th-12th Grade",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "1635 Park Ave",
+                    "City": "San Jose",
+                    "Zip Code": "95126",
+                    "Email": "info@breakthroughsv.org",
+                    "Phone Number": "(408) 287-6357",
+                    "Website": "https://www.breakthroughsv.org/"
+                },
+                {
+                    "Program Name": "Cristo Rey San Jose Jesuit High School",
+                    "Extracurricular Category": "Academic Support",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Cristo Rey San Jose provides a Catholic, college-preparatory education and professional work experience to students with limited financial means. All students participate in a Corporate Work Study Program where they gain real-world job experience.",
+                    "Age Group": "High School",
+                    "Cost": "Reduced Tuition Based on Need",
+                    "Point of Contact": "Admissions Office",
+                    "Address": "138 E. Santa Clara St.",
+                    "City": "San Jose",
+                    "Zip Code": "95113",
+                    "Email": "admissions@cristoreysj.org",
+                    "Phone Number": "(408) 453-9110",
+                    "Website": "https://www.cristoreysj.org/"
+                },
+                {
+                    "Program Name": "Symphony San Jose",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Symphony San Jose offers a variety of programs for music lovers of all ages, including classical concerts, family-friendly performances, and educational outreach. They sometimes offer student discounts.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies by event",
+                    "Point of Contact": "Box Office",
+                    "Address": "325 S. First Street",
+                    "City": "San Jose",
+                    "Zip Code": "95113",
+                    "Email": "info@symphonysanjose.org",
+                    "Phone Number": "(408) 286-2600",
+                    "Website": "https://www.symphonysanjose.org/"
+                },
+                {
+                    "Program Name": "San Jose Museum of Art",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers various art programs, workshops, and camps for children and teens. They have family-free admission days and scholarships for their art camps.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "Education Department",
+                    "Address": "110 South Market Street",
+                    "City": "San Jose",
+                    "Zip Code": "95113",
+                    "Email": "education@sjmusart.org",
+                    "Phone Number": "(408) 271-6840",
+                    "Website": "https://sjmusart.org/"
+                },
+                {
+                    "Program Name": "Children's Discovery Museum of San Jose",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Interactive exhibits and programs focused on science, technology, engineering, art, and math. They offer discounted admission through the Museums for All program.",
+                    "Age Group": "Ages 0-13",
+                    "Cost": "Varies; discounts available",
+                    "Point of Contact": "",
+                    "Address": "180 Woz Way",
+                    "City": "San Jose",
+                    "Zip Code": "95110",
+                    "Email": "contactus@cdm.org",
+                    "Phone Number": "(408) 298-5437",
+                    "Website": "https://www.cdm.org/"
+                },
+                {
+                    "Program Name": "Code Ninjas",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Kids learn to code by building their own video games. They offer a flexible, drop-in learning environment. It is a franchise with multiple locations.",
+                    "Age Group": "Ages 7-14",
+                    "Cost": "Subscription-based",
+                    "Point of Contact": "Varies by location",
+                    "Address": "Multiple Locations",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "https://www.codeninjas.com/"
+                },
+                {
+                    "Program Name": "San Jose Youth Shakespeare",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers camps and workshops where young people can perform Shakespeare's plays. They are committed to making their programs accessible and offer financial aid.",
+                    "Age Group": "Ages 7-18",
+                    "Cost": "Varies; financial aid available",
+                    "Point of Contact": "",
+                    "Address": "P.O. Box 90054",
+                    "City": "San Jose",
+                    "Zip Code": "95109",
+                    "Email": "info@youthshakes.org",
+                    "Phone Number": "",
+                    "Website": "https://www.youthshakes.org/"
+                },
+                {
+                    "Program Name": "Police Activities League (PAL) San Jose",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides low-cost sports programs like soccer, boxing, and baseball, coached by police officers to build positive relationships between law enforcement and youth.",
+                    "Age Group": "Ages 5-18",
+                    "Cost": "Low-cost, scholarships available",
+                    "Point of Contact": "",
+                    "Address": "680 S. 34th Street",
+                    "City": "San Jose",
+                    "Zip Code": "95116",
+                    "Email": "info@sjpal.org",
+                    "Phone Number": "(408) 272-9725",
+                    "Website": "https://www.sjpal.org/"
+                },
+                {
+                    "Program Name": "YMCA of Silicon Valley",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a wide range of youth sports, summer camps, and after-school programs. Financial assistance is available to ensure everyone can participate.",
+                    "Age Group": "All Ages",
+                    "Cost": "Membership-based; financial aid available",
+                    "Point of Contact": "Varies by branch",
+                    "Address": "Multiple Locations",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "https://www.ymcasv.org/"
+                },
+                {
+                    "Program Name": "Girls Who Code",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A national organization with local clubs that offers free after-school programs for girls to learn computer science and coding in a fun and supportive environment.",
+                    "Age Group": "3rd-12th Grade Girls",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "Various locations (schools, libraries, community centers)",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "https://girlswhocode.com/clubs"
+                },
+                {
+                    "Program Name": "San Jose Public Library - Coding 5K",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A self-paced coding program for all ages. Participants learn five different coding languages through online tutorials and library workshops. It's a completely free program.",
+                    "Age Group": "All Ages",
+                    "Cost": "Free",
+                    "Point of Contact": "Library Staff",
+                    "Address": "All San Jose Public Library branches",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "https://www.sjpl.org/coding5k"
+                },
+                {
+                    "Program Name": "The Tech Interactive",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A science and technology center that offers hands-on activities, labs, and design challenges. They have a scholarship program for memberships and camps.",
+                    "Age Group": "All Ages",
+                    "Cost": "Admission fee; scholarships available",
+                    "Point of Contact": "Guest Services",
+                    "Address": "201 S. Market St.",
+                    "City": "San Jose",
+                    "Zip Code": "95113",
+                    "Email": "info@thetech.org",
+                    "Phone Number": "(408) 294-8324",
+                    "Website": "https://www.thetech.org/"
+                },
+                {
+                    "Program Name": "School of Rock San Jose",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Performance-based music education. Students learn an instrument by playing in a band with their peers and performing live shows.",
+                    "Age Group": "Ages 6-18",
+                    "Cost": "Monthly tuition",
+                    "Point of Contact": "",
+                    "Address": "1202 Lincoln Ave",
+                    "City": "San Jose",
+                    "Zip Code": "95125",
+                    "Email": "sanjose@schoolofrock.com",
+                    "Phone Number": "(408) 993-7625",
+                    "Website": "https://www.schoolofrock.com/locations/sanjose"
+                },
+                {
+                    "Program Name": "New Ballet",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides professional-level ballet training and performances. They offer scholarships and financial aid to ensure dance education is accessible to all.",
+                    "Age Group": "Ages 3+",
+                    "Cost": "Varies by class; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "196 N 3rd St",
+                    "City": "San Jose",
+                    "Zip Code": "95112",
+                    "Email": "info@newballet.com",
+                    "Phone Number": "(408) 352-5616",
+                    "Website": "https://newballet.com/"
+                },
+                {
+                    "Program Name": "Vivace Youth Chorus of San Jose",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A community choir for young singers. They focus on vocal technique, music theory, and performance skills. Sibling discounts and financial aid are available.",
+                    "Age Group": "Ages 4-18",
+                    "Cost": "Tuition-based; financial aid available",
+                    "Point of Contact": "Peggy Spool",
+                    "Address": "PO Box 7101",
+                    "City": "San Jose",
+                    "Zip Code": "95150",
+                    "Email": "info@vivaceyouthchorus.org",
+                    "Phone Number": "(408) 885-1746",
+                    "Website": "https://vivaceyouthchorus.org/"
+                },
+                {
+                    "Program Name": "i9 Sports",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Offers youth sports leagues, camps, and clinics in a variety of sports like flag football, soccer, and basketball. The focus is on fun, safety, and good sportsmanship.",
+                    "Age Group": "Ages 3-14",
+                    "Cost": "Registration fee per season",
+                    "Point of Contact": "",
+                    "Address": "Various parks and schools",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "(408) 320-9494",
+                    "Website": "https://www.i9sports.com/"
+                },
+                {
+                    "Program Name": "Silver Creek Sportsplex",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "A large indoor facility offering soccer leagues, basketball, and a huge play structure for kids. They offer various classes and camps.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies",
+                    "Point of Contact": "",
+                    "Address": "800 Embedded Way",
+                    "City": "San Jose",
+                    "Zip Code": "95138",
+                    "Email": "",
+                    "Phone Number": "(408) 224-8774",
+                    "Website": "https://www.gotoplex.com/"
+                },
+                {
+                    "Program Name": "California Sports Center (CSC)",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Offers gymnastics, dance, swimming, and martial arts classes for all ages and skill levels.",
+                    "Age Group": "All Ages",
+                    "Cost": "Monthly tuition",
+                    "Point of Contact": "",
+                    "Address": "Multiple locations",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "https://www.calsportscenter.com/"
+                },
+                {
+                    "Program Name": "Boys & Girls Clubs of Silicon Valley",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides safe and fun after-school and summer programs with a focus on academic success, healthy lifestyles, and character development. Membership is very low-cost.",
+                    "Age Group": "Ages 6-18",
+                    "Cost": "Low annual membership fee",
+                    "Point of Contact": "Varies by clubhouse",
+                    "Address": "Multiple Clubhouses",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "(408) 957-9685",
+                    "Website": "https://www.bgcsv.org/"
+                },
+                {
+                    "Program Name": "City of San Jose Parks, Recreation & Neighborhood Services",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a vast array of affordable classes, camps, and sports leagues for all ages at community centers throughout the city. Scholarships are available for qualifying families.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "City-wide community centers",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "(408) 535-3570",
+                    "Website": "https://www.sanjoseca.gov/prns"
+                },
+                {
+                    "Program Name": "Catholic Charities of Santa Clara County",
+                    "Extracurricular Category": "Academic Support",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers various youth programs, including after-school tutoring, leadership development, and summer camps, primarily for low-income families.",
+                    "Age Group": "Varies by program",
+                    "Cost": "Free or low-cost",
+                    "Point of Contact": "",
+                    "Address": "2625 Zanker Rd",
+                    "City": "San Jose",
+                    "Zip Code": "95134",
+                    "Email": "",
+                    "Phone Number": "(408) 468-0100",
+                    "Website": "https://www.catholiccharitiesscc.org/"
+                },
+                {
+                    "Program Name": "Girl Scouts of Northern California",
+                    "Extracurricular Category": "Leadership/Life Skills",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Builds girls of courage, confidence, and character who make the world a better place. Financial aid is available for membership fees and program costs.",
+                    "Age Group": "K-12 Girls",
+                    "Cost": "Membership fee + troop dues; financial aid available",
+                    "Point of Contact": "",
+                    "Address": "1310 S. Bascom Ave",
+                    "City": "San Jose",
+                    "Zip Code": "95128",
+                    "Email": "",
+                    "Phone Number": "(800) 447-4475",
+                    "Website": "https://www.gsnorcal.org/"
+                },
+                {
+                    "Program Name": "Boy Scouts of America, Silicon Valley Monterey Bay Council",
+                    "Extracurricular Category": "Leadership/Life Skills",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Prepares young people to make ethical and moral choices over their lifetimes by instilling in them the values of the Scout Oath and Law. Financial assistance is available.",
+                    "Age Group": "K-12 Boys & Girls",
+                    "Cost": "Membership fee + unit dues; assistance available",
+                    "Point of Contact": "",
+                    "Address": "970 W. Julian Street",
+                    "City": "San Jose",
+                    "Zip Code": "95126",
+                    "Email": "",
+                    "Phone Number": "(408) 638-8300",
+                    "Website": "https://www.svmbc.org/"
+                },
+                {
+                    "Program Name": "Teens in Tech",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A non-profit organization dedicated to empowering the next generation of tech innovators through conferences, labs, and an incubator program. Many programs are free.",
+                    "Age Group": "Teens",
+                    "Cost": "Free or low-cost",
+                    "Point of Contact": "",
+                    "Address": "",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "team@tnt.org",
+                    "Phone Number": "",
+                    "Website": "https://www.teensintech.com/"
+                },
+                {
+                    "Program Name": "Bay Area LEGO Users Group (BayLUG)",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "A club for LEGO enthusiasts of all ages. They hold regular meetings and public exhibitions. Focus is on creativity and community.",
+                    "Age Group": "All Ages",
+                    "Cost": "Membership Dues",
+                    "Point of Contact": "",
+                    "Address": "Meetings at various locations",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "https://www.baylug.org/"
+                },
+                {
+                    "Program Name": "San Jose Conservation Corps",
+                    "Extracurricular Category": "Leadership/Life Skills",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides youth with job training, academic education, and leadership skills through work experience on conservation and community service projects. It's a paid program.",
+                    "Age Group": "18-27",
+                    "Cost": "Paid program (earns stipend)",
+                    "Point of Contact": "",
+                    "Address": "2650 Senter Road",
+                    "City": "San Jose",
+                    "Zip Code": "95111",
+                    "Email": "",
+                    "Phone Number": "(408) 283-7171",
+                    "Website": "https://www.sjcc.org/"
+                },
+                {
+                    "Program Name": "The First Tee of Silicon Valley",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Teaches life skills and healthy habits to youth through the game of golf. They offer full scholarships to any participant with a financial need.",
+                    "Age Group": "Ages 7-18",
+                    "Cost": "Varies; full scholarships available",
+                    "Point of Contact": "",
+                    "Address": "2508 S. King Rd.",
+                    "City": "San Jose",
+                    "Zip Code": "95122",
+                    "Email": "info@ftsv.org",
+                    "Phone Number": "(408) 288-2937",
+                    "Website": "https://www.firstteesiliconvalley.org/"
+                },
+                {
+                    "Program Name": "San Jose Dance Theatre",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A non-profit organization offering classical ballet training. They are the official school of The San Jose Nutcracker and offer scholarships.",
+                    "Age Group": "Ages 3+",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "Linda Hurkmans",
+                    "Address": "2030 Camden Ave",
+                    "City": "San Jose",
+                    "Zip Code": "95124",
+                    "Email": "info@sjdt.org",
+                    "Phone Number": "(408) 532-8400",
+                    "Website": "https://www.sjdt.org/"
+                },
+                {
+                    "Program Name": "History San José",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Manages History Park, a 14-acre site with historic buildings. They offer educational programs and family events related to the history of Santa Clara Valley.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies by event",
+                    "Point of Contact": "",
+                    "Address": "1650 Senter Rd",
+                    "City": "San Jose",
+                    "Zip Code": "95112",
+                    "Email": "info@historysanjose.org",
+                    "Phone Number": "(408) 287-2290",
+                    "Website": "https://historysanjose.org/"
+                },
+                {
+                    "Program Name": "San Jose Jr. Sharks",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "The official youth hockey club of the San Jose Sharks. They offer programs for all skill levels. The Sharks Foundation offers financial assistance.",
+                    "Age Group": "Ages 4+",
+                    "Cost": "Varies; assistance available",
+                    "Point of Contact": "",
+                    "Address": "1500 S 10th St",
+                    "City": "San Jose",
+                    "Zip Code": "95112",
+                    "Email": "info@sjjrsharks.com",
+                    "Phone Number": "",
+                    "Website": "https://www.sjjrsharks.com/"
+                },
+                {
+                    "Program Name": "West San Jose NJB",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "National Junior Basketball league chapter focused on sportsmanship and player development for all skill levels. Some financial aid may be available upon request.",
+                    "Age Group": "Grades K-8",
+                    "Cost": "Registration fee per season",
+                    "Point of Contact": "",
+                    "Address": "Serves West San Jose area",
+                    "City": "San Jose",
+                    "Zip Code": "",
+                    "Email": "wsjnjb@gmail.com",
+                    "Phone Number": "",
+                    "Website": "https://wsjnjb.com/"
+                },
+                {
+                    "Program Name": "Rosicrucian Egyptian Museum",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Features the largest collection of Egyptian artifacts on exhibit in Western North America. Offers educational programs and workshops for kids and families.",
+                    "Age Group": "All Ages",
+                    "Cost": "Admission fee",
+                    "Point of Contact": "",
+                    "Address": "1660 Park Avenue",
+                    "City": "San Jose",
+                    "Zip Code": "95126",
+                    "Email": "",
+                    "Phone Number": "(408) 947-3635",
+                    "Website": "https://egyptianmuseum.org/"
+                },
+                {
+                    "Program Name": "Peninsula Youth Theatre",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers classes, camps, and performance opportunities for youth. Their 'Stories on Stage' program is also very popular. Scholarships are a core part of their mission.",
+                    "Age Group": "Ages 3-18",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "2500 Old Middlefield Way",
+                    "City": "Mountain View",
+                    "Zip Code": "94043",
+                    "Email": "info@pytnet.org",
+                    "Phone Number": "(650) 988-8798",
+                    "Website": "https://pytnet.org/"
+                },
+                {
+                    "Program Name": "Community School of Music and Arts (CSMA)",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "The largest non-profit provider of arts education in Silicon Valley. Offers classes in music and visual arts. Financial aid is available.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; financial aid available",
+                    "Point of Contact": "",
+                    "Address": "230 San Antonio Circle",
+                    "City": "Mountain View",
+                    "Zip Code": "94040",
+                    "Email": "",
+                    "Phone Number": "(650) 917-6800",
+                    "Website": "https://arts4all.org/"
+                },
+                {
+                    "Program Name": "Mountain View Police Activities League (MVPAL)",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A non-profit organization dedicated to providing recreational, educational and athletic programs for the youth of Mountain View at a low-cost.",
+                    "Age Group": "Ages 5-18",
+                    "Cost": "Low-cost",
+                    "Point of Contact": "",
+                    "Address": "PO Box 754",
+                    "City": "Mountain View",
+                    "Zip Code": "94042",
+                    "Email": "info@mvpal.org",
+                    "Phone Number": "(650) 903-6178",
+                    "Website": "https://www.mvpal.org/"
+                },
+                {
+                    "Program Name": "City of Mountain View Recreation",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a wide range of classes, sports, and camps for all ages. Scholarship program is available for residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "201 S. Rengstorff Ave",
+                    "City": "Mountain View",
+                    "Zip Code": "94040",
+                    "Email": "recreation@mountainview.gov",
+                    "Phone Number": "(650) 903-6331",
+                    "Website": "https://www.mountainview.gov/depts/cs/rec/default.asp"
+                },
+                {
+                    "Program Name": "NASA Ames Visitor Center",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Learn about space exploration and NASA's work. Admission is free, making it an accessible educational outing for families.",
+                    "Age Group": "All Ages",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "Moffett Field",
+                    "City": "Mountain View",
+                    "Zip Code": "94035",
+                    "Email": "",
+                    "Phone Number": "(650) 604-6274",
+                    "Website": "https://www.nasa.gov/ames/visitorcenter.html"
+                },
+                {
+                    "Program Name": "TheatreWorks Silicon Valley",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "A nationally recognized professional theatre company. They offer student matinees and educational programs, but not typically direct financial aid for general admission.",
+                    "Age Group": "Varies by show",
+                    "Cost": "Ticket prices vary",
+                    "Point of Contact": "Box Office",
+                    "Address": "500 Castro St",
+                    "City": "Mountain View",
+                    "Zip Code": "94041",
+                    "Email": "boxoffice@theatreworks.org",
+                    "Phone Number": "(650) 463-1960",
+                    "Website": "https://theatreworks.org/"
+                },
+                {
+                    "Program Name": "Hidden Villa",
+                    "Extracurricular Category": "Outdoor/Environmental",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A non-profit educational organization that uses its organic farm, wilderness, and community to teach about the environment and social justice. Scholarships are available for their camps.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "26870 Moody Road",
+                    "City": "Los Altos Hills",
+                    "Zip Code": "94022",
+                    "Email": "",
+                    "Phone Number": "(650) 949-8650",
+                    "Website": "https://www.hiddenvilla.org/"
+                },
+                {
+                    "Program Name": "Los Altos Stage Company",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "A community theatre that produces plays and musicals. They have youth programs and camps, but financial aid information is not prominent.",
+                    "Age Group": "Varies",
+                    "Cost": "Varies",
+                    "Point of Contact": "",
+                    "Address": "97 Hillview Avenue",
+                    "City": "Los Altos",
+                    "Zip Code": "94022",
+                    "Email": "",
+                    "Phone Number": "(650) 941-0551",
+                    "Website": "https://losaltosstage.org/"
+                },
+                {
+                    "Program Name": "City of Los Altos Recreation & Community Services",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides a variety of classes, camps, and activities for youth and adults. They offer a fee assistance program for residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; assistance available",
+                    "Point of Contact": "",
+                    "Address": "97 Hillview Avenue",
+                    "City": "Los Altos",
+                    "Zip Code": "94022",
+                    "Email": "rec-info@losaltosca.gov",
+                    "Phone Number": "(650) 947-2790",
+                    "Website": "https://www.losaltosca.gov/recreation"
+                },
+                {
+                    "Program Name": "Palo Alto Junior Museum & Zoo",
+                    "Extracurricular Category": "Outdoor/Environmental",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A place for families to explore, play, and learn about science and nature. They offer scholarships for their programs and have a fund for free admissions.",
+                    "Age Group": "Primarily for young children",
+                    "Cost": "Admission fee; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "1451 Middlefield Rd",
+                    "City": "Palo Alto",
+                    "Zip Code": "94301",
+                    "Email": "jmz@cityofpaloalto.org",
+                    "Phone Number": "(650) 329-2111",
+                    "Website": "https://www.cityofpaloalto.org/jmz"
+                },
+                {
+                    "Program Name": "Palo Alto Children's Theatre",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "The nation's oldest theatre for young people. They offer classes, camps, and performance opportunities with a robust scholarship program.",
+                    "Age Group": "Ages 3-18",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "1305 Middlefield Rd",
+                    "City": "Palo Alto",
+                    "Zip Code": "94301",
+                    "Email": "",
+                    "Phone Number": "(650) 463-4970",
+                    "Website": "https://www.cityofpaloalto.org/pact"
+                },
+                {
+                    "Program Name": "City of Palo Alto Recreation",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a wide variety of activities from sports to arts and sciences. The Palo Alto Community Fund provides leisure scholarships to residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "Various locations",
+                    "City": "Palo Alto",
+                    "Zip Code": "",
+                    "Email": "fun@cityofpaloalto.org",
+                    "Phone Number": "(650) 463-4900",
+                    "Website": "https://www.cityofpaloalto.org/enjoy"
+                },
+                {
+                    "Program Name": "Palo Alto Art Center",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides hands-on art experiences for all ages through classes, workshops, and exhibitions. Scholarships are available for all their classes.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "1313 Newell Rd",
+                    "City": "Palo Alto",
+                    "Zip Code": "94303",
+                    "Email": "",
+                    "Phone Number": "(650) 329-2366",
+                    "Website": "https://www.cityofpaloalto.org/artcenter"
+                },
+                {
+                    "Program Name": "Environmental Volunteers",
+                    "Extracurricular Category": "Outdoor/Environmental",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Inspires a love of science and nature through hands-on education. They offer school programs and community events, many of which are free or low-cost.",
+                    "Age Group": "K-12 and families",
+                    "Cost": "Mostly free",
+                    "Point of Contact": "",
+                    "Address": "2560 Embarcadero Rd",
+                    "City": "Palo Alto",
+                    "Zip Code": "94303",
+                    "Email": "info@evols.org",
+                    "Phone Number": "(650) 961-0545",
+                    "Website": "https://www.evols.org/"
+                },
+                {
+                    "Program Name": "Palo Alto Soccer Club",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A non-profit organization offering recreational and competitive soccer programs. They have a financial aid program to help with fees.",
+                    "Age Group": "Ages 4-18",
+                    "Cost": "Varies by program; financial aid available",
+                    "Point of Contact": "",
+                    "Address": "P.O. Box 60515",
+                    "City": "Palo Alto",
+                    "Zip Code": "94306",
+                    "Email": "info@pasoccerclub.org",
+                    "Phone Number": "",
+                    "Website": "https://www.pasoccerclub.org/"
+                },
+                {
+                    "Program Name": "Silicon Valley Bicycle Coalition (SVBC)",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Advocates for better bicycling infrastructure and offers classes on bike safety for children and adults. Many classes are free.",
+                    "Age Group": "All Ages",
+                    "Cost": "Free or low-cost",
+                    "Point of Contact": "",
+                    "Address": "155 S. 11th Street",
+                    "City": "San Jose",
+                    "Zip Code": "95112",
+                    "Email": "",
+                    "Phone Number": "(408) 287-7259",
+                    "Website": "https://bikesiliconvalley.org/"
+                },
+                {
+                    "Program Name": "Santa Clara PAL",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers low-cost sports programs including flag football, baseball, softball, and BMX racing, run by Santa Clara police officers.",
+                    "Age Group": "Ages 5-18",
+                    "Cost": "Low-cost",
+                    "Point of Contact": "",
+                    "Address": "601 El Camino Real",
+                    "City": "Santa Clara",
+                    "Zip Code": "95050",
+                    "Email": "pal@santaclaraca.gov",
+                    "Phone Number": "(408) 615-4879",
+                    "Website": "https://www.santaclarapal.org/"
+                },
+                {
+                    "Program Name": "City of Santa Clara Parks & Recreation",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a wide variety of classes, camps, and activities. They have a scholarship program for residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "1500 Warburton Ave",
+                    "City": "Santa Clara",
+                    "Zip Code": "95050",
+                    "Email": "parksandrecreation@santaclaraca.gov",
+                    "Phone Number": "(408) 615-3140",
+                    "Website": "https://www.santaclaraca.gov/parksandrec"
+                },
+                {
+                    "Program Name": "Santa Clara Youth Soccer League",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A recreational soccer league for children of all skill levels. They offer financial aid for registration fees.",
+                    "Age Group": "Ages 4-18",
+                    "Cost": "Registration fee; financial aid available",
+                    "Point of Contact": "",
+                    "Address": "PO Box 2307",
+                    "City": "Santa Clara",
+                    "Zip Code": "95055",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "http://www.scyouthsoccer.org/"
+                },
+                {
+                    "Program Name": "Triton Museum of Art",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A museum focused on 20th and 21st-century art with an emphasis on artists from the Greater Bay Area. Admission is free, and they have family art days.",
+                    "Age Group": "All Ages",
+                    "Cost": "Free admission",
+                    "Point of Contact": "",
+                    "Address": "1505 Warburton Ave",
+                    "City": "Santa Clara",
+                    "Zip Code": "95050",
+                    "Email": "info@tritonmuseum.org",
+                    "Phone Number": "(408) 247-3754",
+                    "Website": "https://www.tritonmuseum.org/"
+                },
+                {
+                    "Program Name": "Intel Museum",
+                    "Extracurricular Category": "STEM",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Explore the history of Intel and the technology of silicon chips through interactive exhibits. Admission is free.",
+                    "Age Group": "All Ages",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "2200 Mission College Blvd",
+                    "City": "Santa Clara",
+                    "Zip Code": "95054",
+                    "Email": "",
+                    "Phone Number": "(408) 765-0503",
+                    "Website": "https://www.intel.com/content/www/us/en/history/museum.html"
+                },
+                {
+                    "Program Name": "City of Sunnyvale Creative Arts",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers classes in ceramics, painting, drawing, and more for all ages. Fee assistance is available for Sunnyvale residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; fee assistance available",
+                    "Point of Contact": "",
+                    "Address": "550 E. Remington Dr.",
+                    "City": "Sunnyvale",
+                    "Zip Code": "94087",
+                    "Email": "",
+                    "Phone Number": "(408) 730-7350",
+                    "Website": "https://www.sunnyvale.ca.gov/community/creativearts"
+                },
+                {
+                    "Program Name": "Sunnyvale Public Library",
+                    "Extracurricular Category": "Academic Support",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a wide range of free programs including storytimes, book clubs, homework help, and various workshops for all ages.",
+                    "Age Group": "All Ages",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "665 W. Olive Ave.",
+                    "City": "Sunnyvale",
+                    "Zip Code": "94086",
+                    "Email": "",
+                    "Phone Number": "(408) 730-7300",
+                    "Website": "https://www.sunnyvale.ca.gov/library"
+                },
+                {
+                    "Program Name": "City of Sunnyvale Recreation",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides a variety of sports leagues, classes, and camps. Fee assistance is available for Sunnyvale residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; fee assistance available",
+                    "Point of Contact": "",
+                    "Address": "Various locations",
+                    "City": "Sunnyvale",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "(408) 730-7350",
+                    "Website": "https://www.sunnyvale.ca.gov/community/classes"
+                },
+                {
+                    "Program Name": "Columbia Neighborhood Center",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A city-run center providing after-school programs, homework help, recreation, and family support services for free or at a very low cost.",
+                    "Age Group": "All Ages",
+                    "Cost": "Free or low-cost",
+                    "Point of Contact": "",
+                    "Address": "785 Morse Ave",
+                    "City": "Sunnyvale",
+                    "Zip Code": "94085",
+                    "Email": "",
+                    "Phone Number": "(408) 730-7800",
+                    "Website": "https://www.sunnyvale.ca.gov/community/columbia"
+                },
+                {
+                    "Program Name": "California Theatre Center (CTC)",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Note: This organization has significantly downsized and may no longer offer the same breadth of programs. Historically offered professional theatre for young audiences and conservatory classes.",
+                    "Age Group": "Varies",
+                    "Cost": "Varies",
+                    "Point of Contact": "",
+                    "Address": "P.O. Box 2007",
+                    "City": "Sunnyvale",
+                    "Zip Code": "94087",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "http://www.ctcinc.org/"
+                },
+                {
+                    "Program Name": "Cupertino PAL",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "In partnership with the Santa Clara County Sheriff's Office, offers low-cost sports programs like basketball and volleyball.",
+                    "Age Group": "Youth",
+                    "Cost": "Low-cost",
+                    "Point of Contact": "",
+                    "Address": "",
+                    "City": "Cupertino",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "(408) 777-3179",
+                    "Website": "https://www.cupertinopal.com/"
+                },
+                {
+                    "Program Name": "City of Cupertino Recreation and Community Services",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a huge variety of classes from sports and arts to STEM. A fee-waiver program is available for residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; fee-waiver available",
+                    "Point of Contact": "",
+                    "Address": "10350 Torre Ave",
+                    "City": "Cupertino",
+                    "Zip Code": "95014",
+                    "Email": "recreation@cupertino.org",
+                    "Phone Number": "(408) 777-3120",
+                    "Website": "https://www.cupertino.org/our-city/departments/recreation-and-community-services"
+                },
+                {
+                    "Program Name": "De Anza College & Foothill College Community Education",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Offers a wide range of not-for-credit classes for personal enrichment for all ages, including many for kids and teens during the summer.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies",
+                    "Point of Contact": "",
+                    "Address": "21250 Stevens Creek Blvd",
+                    "City": "Cupertino",
+                    "Zip Code": "95014",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "https://www.deanza.edu/academy/"
+                },
+                {
+                    "Program Name": "Euphrat Museum of Art",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Located at De Anza College, the museum features contemporary art. Admission is free, and they have community art programs.",
+                    "Age Group": "All Ages",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "21250 Stevens Creek Blvd",
+                    "City": "Cupertino",
+                    "Zip Code": "95014",
+                    "Email": "",
+                    "Phone Number": "(408) 864-8836",
+                    "Website": "https://www.deanza.edu/euphrat/"
+                },
+                {
+                    "Program Name": "Bay Area Chess",
+                    "Extracurricular Category": "Academic Support",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers chess classes, camps, and tournaments for all levels. They have a robust scholarship program for their events.",
+                    "Age Group": "Ages 5+",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "2050 Concourse Dr #42",
+                    "City": "San Jose",
+                    "Zip Code": "95131",
+                    "Email": "ask@bayareachess.com",
+                    "Phone Number": "(408) 409-6596",
+                    "Website": "https://www.bayareachess.com/"
+                },
+                {
+                    "Program Name": "West Valley Community Services",
+                    "Extracurricular Category": "Academic Support",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "While primarily a human services agency, they offer back-to-school programs and other support that enables children to participate in school activities.",
+                    "Age Group": "Families with children",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "10104 Vista Drive",
+                    "City": "Cupertino",
+                    "Zip Code": "95014",
+                    "Email": "",
+                    "Phone Number": "(408) 255-8033",
+                    "Website": "https://www.wvcommunityservices.org/"
+                },
+                {
+                    "Program Name": "Milpitas PAL",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers sports programs including soccer and basketball at a low cost for Milpitas youth.",
+                    "Age Group": "Youth",
+                    "Cost": "Low-cost",
+                    "Point of Contact": "",
+                    "Address": "1265 N. Milpitas Blvd",
+                    "City": "Milpitas",
+                    "Zip Code": "95035",
+                    "Email": "",
+                    "Phone Number": "(408) 586-2400",
+                    "Website": "https://www.ci.milpitas.ca.gov/milpitas/departments/police-department/community-policing/pal/"
+                },
+                {
+                    "Program Name": "City of Milpitas Recreation and Community Services",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides a wide variety of affordable recreation programs. A scholarship program is available for residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "457 E. Calaveras Blvd",
+                    "City": "Milpitas",
+                    "Zip Code": "95035",
+                    "Email": "recreation@ci.milpitas.ca.gov",
+                    "Phone Number": "(408) 586-3210",
+                    "Website": "https://www.ci.milpitas.ca.gov/milpitas/departments/recreation-services/"
+                },
+                {
+                    "Program Name": "India Community Center (ICC)",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Offers a wide range of programs including sports (badminton, table tennis), fitness, and cultural classes for all ages.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies",
+                    "Point of Contact": "",
+                    "Address": "525 Los Coches St",
+                    "City": "Milpitas",
+                    "Zip Code": "95035",
+                    "Email": "",
+                    "Phone Number": "(408) 934-1130",
+                    "Website": "https://www.indiacc.org/"
+                },
+                {
+                    "Program Name": "Milpitas Youth Center",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A drop-in after-school program for teens offering a safe space with a gym, computer lab, and various recreational activities.",
+                    "Age Group": "Teens (13-18)",
+                    "Cost": "Low-cost membership",
+                    "Point of Contact": "",
+                    "Address": "190 S. Abel Street",
+                    "City": "Milpitas",
+                    "Zip Code": "95035",
+                    "Email": "",
+                    "Phone Number": "(408) 586-3210",
+                    "Website": "https://www.ci.milpitas.ca.gov/milpitas/departments/recreation-services/teen-center/"
+                },
+                {
+                    "Program Name": "Silicon Valley Karate",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "A well-regarded martial arts school teaching traditional Shotokan karate.",
+                    "Age Group": "Ages 5+",
+                    "Cost": "Monthly tuition",
+                    "Point of Contact": "",
+                    "Address": "640 E. Calaveras Blvd.",
+                    "City": "Milpitas",
+                    "Zip Code": "95035",
+                    "Email": "info@svkarate.com",
+                    "Phone Number": "(408) 263-1466",
+                    "Website": "https://www.svkarate.com/"
+                },
+                {
+                    "Program Name": "Rockin' Kidz",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Music school offering private lessons and group classes for various instruments.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies by program",
+                    "Point of Contact": "",
+                    "Address": "171 W. Calaveras Blvd",
+                    "City": "Milpitas",
+                    "Zip Code": "95035",
+                    "Email": "",
+                    "Phone Number": "(408) 401-5211",
+                    "Website": "https://www.rockinkidz.com/"
+                },
+                {
+                    "Program Name": "My Art School",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Art school offering classes in drawing and painting for children and adults.",
+                    "Age Group": "Ages 4+",
+                    "Cost": "Varies",
+                    "Point of Contact": "",
+                    "Address": "748 N Milpitas Blvd",
+                    "City": "Milpitas",
+                    "Zip Code": "95035",
+                    "Email": "",
+                    "Phone Number": "(408) 935-9890",
+                    "Website": "https://www.myartschool.com/"
+                },
+                {
+                    "Program Name": "Morgan Hill PAL",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Works with the Morgan Hill Police Department to offer sports programs like boxing and judo at a low cost.",
+                    "Age Group": "Youth",
+                    "Cost": "Low-cost",
+                    "Point of Contact": "",
+                    "Address": "16200 Vineyard Blvd",
+                    "City": "Morgan Hill",
+                    "Zip Code": "95037",
+                    "Email": "",
+                    "Phone Number": "(408) 779-2101",
+                    "Website": "https://www.morganhill.ca.gov/190/Police-Activities-League"
+                },
+                {
+                    "Program Name": "City of Morgan Hill Recreation & Community Services",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a wide range of youth and adult programs. They have a scholarship program for eligible residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "171 W. Edmundson Ave",
+                    "City": "Morgan Hill",
+                    "Zip Code": "95037",
+                    "Email": "recreation@morganhill.ca.gov",
+                    "Phone Number": "(408) 782-0008",
+                    "Website": "https://www.morgan-hill.ca.gov/329/Recreation-Community-Services"
+                },
+                {
+                    "Program Name": "Morgan Hill Raiders Youth Football & Cheer",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A non-profit organization offering tackle football and cheer programs. Payment plans and some financial assistance are available.",
+                    "Age Group": "Ages 6-14",
+                    "Cost": "Registration fee; assistance available",
+                    "Point of Contact": "",
+                    "Address": "",
+                    "City": "Morgan Hill",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "https://www.mhpalraiders.com/"
+                },
+                {
+                    "Program Name": "El Toro Youth Center",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides after-school and summer programs with academic support, recreational activities, and leadership development for youth in Morgan Hill.",
+                    "Age Group": "Ages 5-18",
+                    "Cost": "Low-cost",
+                    "Point of Contact": "",
+                    "Address": "17620 Crest Ave",
+                    "City": "Morgan Hill",
+                    "Zip Code": "95037",
+                    "Email": "",
+                    "Phone Number": "(408) 779-6002",
+                    "Website": ""
+                },
+                {
+                    "Program Name": "Theater Fun",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Offers musical theatre classes and camps for children.",
+                    "Age Group": "Ages 4-12",
+                    "Cost": "Varies",
+                    "Point of Contact": "Laura Bertoldi",
+                    "Address": "",
+                    "City": "Morgan Hill",
+                    "Zip Code": "",
+                    "Email": "theaterfun@mac.com",
+                    "Phone Number": "(408) 839-3693",
+                    "Website": "https://www.theaterfun.com/"
+                },
+                {
+                    "Program Name": "Gilroy PAL",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides programs like boxing and wrestling, connecting youth with Gilroy Police Officers.",
+                    "Age Group": "Youth",
+                    "Cost": "Low-cost",
+                    "Point of Contact": "",
+                    "Address": "7301 Hanna St",
+                    "City": "Gilroy",
+                    "Zip Code": "95020",
+                    "Email": "",
+                    "Phone Number": "(408) 846-0350",
+                    "Website": "https://www.cityofgilroy.org/194/Police-Activities-League-PAL"
+                },
+                {
+                    "Program Name": "City of Gilroy Recreation Division",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a wide range of programs, classes, and sports for all ages. A scholarship program is available for residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "7351 Rosanna St",
+                    "City": "Gilroy",
+                    "Zip Code": "95020",
+                    "Email": "rec@cityofgilroy.org",
+                    "Phone Number": "(408) 846-0460",
+                    "Website": "https://www.cityofgilroy.org/218/Recreation"
+                },
+                {
+                    "Program Name": "Gilroy Youth Center - \"The Vibe\"",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A drop-in center for teens offering a safe place to hang out, do homework, and participate in activities.",
+                    "Age Group": "Grades 6-12",
+                    "Cost": "Free with student ID",
+                    "Point of Contact": "",
+                    "Address": "7351 Rosanna St",
+                    "City": "Gilroy",
+                    "Zip Code": "95020",
+                    "Email": "",
+                    "Phone Number": "(408) 846-0460",
+                    "Website": "https://www.cityofgilroy.org/549/The-Vibe-Teen-Center"
+                },
+                {
+                    "Program Name": "South County Performing Arts",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Offers classes in dance, music, and theatre for various ages.",
+                    "Age Group": "Ages 2+",
+                    "Cost": "Varies",
+                    "Point of Contact": "",
+                    "Address": "8470 N. Monterey Street",
+                    "City": "Gilroy",
+                    "Zip Code": "95020",
+                    "Email": "",
+                    "Phone Number": "(408) 846-7674",
+                    "Website": "https://www.scpa-kids.com/"
+                },
+                {
+                    "Program Name": "Gilroy Gators Swim Team",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A year-round competitive swim team. They offer a scholarship program to help families with fees.",
+                    "Age Group": "Ages 5-18",
+                    "Cost": "Monthly dues + fees; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "P.O. Box 1711",
+                    "City": "Gilroy",
+                    "Zip Code": "95021",
+                    "Email": "",
+                    "Phone Number": "",
+                    "Website": "https://www.teamunify.com/team/pcggsc/page/home"
+                },
+                {
+                    "Program Name": "Rebekah Children's Services",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Provides mental health, foster care, and family support services. They often have enrichment programs and activities for the children they serve.",
+                    "Age Group": "Varies",
+                    "Cost": "Free for clients",
+                    "Point of Contact": "",
+                    "Address": "290 IOOF Ave",
+                    "City": "Gilroy",
+                    "Zip Code": "95020",
+                    "Email": "",
+                    "Phone Number": "(408) 846-2100",
+                    "Website": "https://www.rcskids.org/"
+                },
+                {
+                    "Program Name": "City of Campbell Recreation & Community Services",
+                    "Extracurricular Category": "General/Multiple",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers a wide range of classes, camps, and activities. A scholarship program is available for Campbell residents.",
+                    "Age Group": "All Ages",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "1 W. Campbell Ave",
+                    "City": "Campbell",
+                    "Zip Code": "95008",
+                    "Email": "",
+                    "Phone Number": "(408) 866-2104",
+                    "Website": "https://www.campbellca.gov/275/Recreation-Community-Services"
+                },
+                {
+                    "Program Name": "Campbell PAL",
+                    "Extracurricular Category": "Sports",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Offers soccer and other sports programs at a low cost, run by Campbell Police Department personnel.",
+                    "Age Group": "Youth",
+                    "Cost": "Low-cost",
+                    "Point of Contact": "",
+                    "Address": "",
+                    "City": "Campbell",
+                    "Zip Code": "",
+                    "Email": "",
+                    "Phone Number": "(408) 866-2101",
+                    "Website": "https://www.campbellca.gov/331/Police-Activities-League-PAL"
+                },
+                {
+                    "Program Name": "Dance Expressions",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "No",
+                    "Notes": "Dance studio offering classes in ballet, tap, jazz, hip hop, and more.",
+                    "Age Group": "Ages 2.5+",
+                    "Cost": "Varies",
+                    "Point of Contact": "",
+                    "Address": "1775 S. Bascom Ave",
+                    "City": "Campbell",
+                    "Zip Code": "95008",
+                    "Email": "",
+                    "Phone Number": "(408) 377-5436",
+                    "Website": "https://www.danceexpressions.com/"
+                },
+                {
+                    "Program Name": "The Music Place",
+                    "Extracurricular Category": "Arts",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "Music school offering early childhood music, private lessons, and group classes. They have a scholarship fund.",
+                    "Age Group": "Ages 1+",
+                    "Cost": "Varies; scholarships available",
+                    "Point of Contact": "",
+                    "Address": "1617 S. Bascom Ave",
+                    "City": "Campbell",
+                    "Zip Code": "95008",
+                    "Email": "",
+                    "Phone Number": "(408) 448-0238",
+                    "Website": "https://www.musicplace.com/"
+                },
+                {
+                    "Program Name": "Campbell Youth Commission",
+                    "Extracurricular Category": "Leadership/Life Skills",
+                    "Scholarship / Financial Aid Available?": "Yes",
+                    "Notes": "A teen advisory group to the City Council that plans events and activities for Campbell youth. Participation is free.",
+                    "Age Group": "Grades 7-12",
+                    "Cost": "Free",
+                    "Point of Contact": "",
+                    "Address": "1 W. Campbell Ave",
+                    "City": "Campbell",
+                    "Zip Code": "95008",
+                    "Email": "",
+                    "Phone Number": "(408) 866-2191",
+                    "Website": "https://www.campbellca.gov/302/Youth-Commission"
                 }
-                const csvText = await response.text();
-                
-                programsData = parseCSV(csvText);
-                
-                // Hide loading indicator
-                loadingIndicator.classList.add('hidden');
+            ];
 
-                // Proceed with app initialization
-                populateFilters();
-                renderPrograms();
-
-                // Add event listeners for filters
-                categoryFilter.addEventListener('change', renderPrograms);
-                cityFilter.addEventListener('change', renderPrograms);
-                scholarshipFilter.addEventListener('change', renderPrograms);
-                resetFiltersBtn.addEventListener('click', resetAllFilters);
-
-            } catch (error) {
-                console.error('Failed to load program data:', error);
-                // Show an error message to the user
-                loadingIndicator.innerHTML = `
-                    <div class="flex flex-col items-center text-red-600">
-                        <i data-lucide="alert-triangle" class="w-12 h-12 mx-auto"></i>
-                        <p class="mt-4 text-lg font-semibold">Failed to load programs.</p>
-                        <p class="text-gray-600 text-sm mt-1">Could not fetch data from the Google Sheet. Please ensure it's publicly shared ("Anyone with the link can view").</p>
-                    </div>
-                `;
-                lucide.createIcons();
+            // Hide the loading indicator that is no longer needed
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.parentElement.removeChild(loadingIndicator);
             }
+
+            // Proceed with app initialization
+            populateFilters();
+            renderPrograms();
+            lucide.createIcons();
+
+            // Add event listeners for filters
+            categoryFilter.addEventListener('change', renderPrograms);
+            cityFilter.addEventListener('change', renderPrograms);
+            scholarshipFilter.addEventListener('change', renderPrograms);
+            resetFiltersBtn.addEventListener('click', resetAllFilters);
         });
     </script>
 </body>
