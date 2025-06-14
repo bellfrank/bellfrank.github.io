@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConneXion - Find Your Activity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .scholarship-badge {
+            background-color: #D1FAE5; /* A light green color */
+            color: #065F46; /* A dark green color */
+        }
+        .no-scholarship-badge {
+            background-color: #FEE2E2; /* A light red color */
+            color: #991B1B; /* A dark red color */
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .gemini-btn {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .gemini-btn:hover {
+            background-color: #4338ca;
+        }
+        .gemini-btn:disabled {
+            background-color: #a5b4fc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <svg class="h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/></svg>
+                    <h1 class="text-2xl font-bold text-gray-900">Conne<span class="text-indigo-600">X</span>ion</h1>
+                </div>
+                <p class="hidden md:block text-gray-500">Connecting families to opportunities.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <!-- Intro Section -->
+        <div class="text-center mb-10">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Find Extracurricular Activities in Your Area</h2>
+            <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-500">Discover sports, arts, STEM programs, and more. We focus on highlighting programs with financial aid to ensure every child has a chance to grow.</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white p-4 rounded-xl shadow-md mb-8 sticky top-[73px] z-40">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Category Filter -->
+                <div>
+                    <label for="category-filter" class="block text-sm font-medium text-gray-700">Category</label>
+                    <select id="category-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option>All Categories</option>
+                    </select>
+                </div>
+                <!-- City Filter -->
+                <div>
+                    <label for="city-filter" class="block text-sm font-medium text-gray-700">City</label>
+                    <select id="city-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option>All Cities</option>
+                    </select>
+                </div>
+                <!-- Scholarship Filter -->
+                <div>
+                     <label for="scholarship-filter" class="block text-sm font-medium text-gray-700">Financial Aid</label>
+                    <select id="scholarship-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option>Any</option>
+                        <option value="Yes">Aid Available</option>
+                        <option value="No">No Aid Mentioned</option>
+                    </select>
+                </div>
+                <!-- Reset Button -->
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700 invisible">Reset</label>
+                    <button id="reset-filters" class="mt-1 w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i>
+                        Reset Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Info -->
+        <div id="results-info" class="mb-4 text-gray-600"></div>
+
+
+        <!-- Program Cards Grid -->
+        <div id="programs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Program cards will be inserted here by JavaScript -->
+        </div>
+        
+        <!-- No Results Message -->
+        <div id="no-results" class="hidden text-center py-16">
+            <i data-lucide="search-x" class="w-16 h-16 mx-auto text-gray-400"></i>
+            <h3 class="mt-2 text-xl font-medium text-gray-900">No Programs Found</h3>
+            <p class="mt-1 text-md text-gray-500">Try adjusting your filters to find more activities.</p>
+        </div>
+
+    </main>
+
+    <!-- Modal for Program Details -->
+    <div id="program-modal" class="modal-backdrop hidden">
+        <div class="modal-content bg-white rounded-lg shadow-xl m-4 w-full max-w-2xl transform transition-all">
+             <!-- Modal content will be injected here -->
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="bg-white mt-16 border-t">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>&copy; 2024 ConneXion. All rights reserved.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        // Data from the CSV file provided by the user.
+        // In a real application, this would be fetched from a server/database.
+        const csvData = `Program Name,Point of Contact,Email,Phone Number,Address,City,Zip Code,Website,Scholarship / Financial Aid Available?,Extracurricular Category,Cost,Age Group,Notes
+San Jose Youth Symphony,,info@sjys.org,(408) 225-2300,,San Jose,,https://sjys.org/,Yes,Arts,"$1,000 - $2,500 per season",8-18,"Offers various orchestral programs for different skill levels."
+San Jose Museum of Art,,education@sjmusart.org,(408) 271-6840,110 S Market St,San Jose,95113,https://sjmusart.org/,Yes,Arts,"Varies by program, scholarships available","5-18",Offers art classes and workshops for children and teens.
+Children's Discovery Museum of San Jose,,contact@cdm.org,(408) 298-5437,180 Woz Way,San Jose,95110,https://www.cdm.org/,Yes,STEM,"Memberships and program fees apply, financial aid available",0-13,Hands-on exhibits and programs focused on science and technology.
+Techbridge Girls,,help@techbridgegirls.org,,PO Box 71298,Oakland,94612,https://techbridgegirls.org/,Yes,STEM,"Free programs for girls from under-resourced communities","Grades 4-12",Focuses on STEM education for girls and gender-expansive youth.
+Code Ninjas (Multiple Locations),,,,Multiple Locations,San Jose,,https://www.codeninjas.com/,No,STEM,"Varies by location, typically monthly tuition",7-14,Teaches kids to code by building video games.
+i9 Sports,,,(408) 845-6900,Various parks and schools,San Jose,,https://www.i9sports.com/,No,Sports,"Varies by sport and season",3-14,"Offers a variety of youth sports leagues, clinics, and camps."
+San Jose Batting Cages & Pro Shop,,info@sjbattingcages.com,(408) 360-9076,474 Piercy Rd,San Jose,95138,http://www.sjbattingcages.com/,No,Sports,"Pay-per-use for batting cages",All Ages,Provides batting cages for baseball and softball practice.
+Silver Creek Sportsplex,,info@gotoplex.com,(408) 224-8774,800 Embedded Way,San Jose,95138,https://gotoplex.com/,Yes,Sports,"Membership and program fees apply, scholarships may be available",All Ages,"Large sports facility with soccer, roller hockey, and more."
+City of San Jose Parks, Recreation & Neighborhood Services,,,Various community centers,San Jose,,https://www.sanjoseca.gov/prns,Yes,Multiple,"Low-cost programs, scholarships available (San Jose residents only)",All Ages,"Offers a wide range of affordable classes, camps, and sports leagues."
+YMCA of Silicon Valley,,,Various locations,San Jose,,https://www.ymcasv.org/,Yes,Multiple,"Membership fees with financial assistance available",All Ages,Provides various youth programs including sports and camps.`;
+
+        // --- DOM Elements ---
+        const programsGrid = document.getElementById('programs-grid');
+        const categoryFilter = document.getElementById('category-filter');
+        const cityFilter = document.getElementById('city-filter');
+        const scholarshipFilter = document.getElementById('scholarship-filter');
+        const noResultsDiv = document.getElementById('no-results');
+        const resultsInfoDiv = document.getElementById('results-info');
+        const resetFiltersBtn = document.getElementById('reset-filters');
+        const modal = document.getElementById('program-modal');
+
+        let programsData = [];
+
+        // --- Gemini API Functions ---
+
+        /**
+         * Calls the Gemini API to generate text based on a prompt.
+         * @param {string} prompt The prompt to send to the Gemini API.
+         * @returns {Promise<string>} The generated text from the API.
+         */
+        async function callGemini(prompt) {
+            const apiKey = ""; // API key will be automatically provided by the environment.
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }]
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API call failed with status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    console.error("Unexpected API response structure:", result);
+                    return "Sorry, couldn't get a response. The API returned an unexpected format.";
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                return "Sorry, there was an error communicating with the AI. Please try again later.";
+            }
+        }
+
+        /**
+         * Copies text to the clipboard and provides user feedback on the button.
+         * @param {string} text The text to copy.
+         * @param {HTMLElement} buttonElement The button that was clicked.
+         */
+        function copyToClipboard(text, buttonElement) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page in MS Edge.
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                buttonElement.innerHTML = `<i data-lucide="check" class="w-4 h-4 mr-2"></i> Copied!`;
+                setTimeout(() => {
+                    buttonElement.innerHTML = `<i data-lucide="copy" class="w-4 h-4 mr-2"></i> Copy Email`;
+                    lucide.createIcons();
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                buttonElement.textContent = 'Copy Failed';
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // --- UI and Data Functions ---
+
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                const entry = {};
+                for (let j = 0; j < headers.length; j++) {
+                    let value = values[j] || '';
+                    entry[headers[j]] = value.replace(/"/g, '').trim();
+                }
+                data.push(entry);
+            }
+            return data;
+        }
+
+        function createProgramCard(program) {
+            const hasScholarship = program['Scholarship / Financial Aid Available?'] === 'Yes';
+            const scholarshipBadgeClass = hasScholarship ? 'scholarship-badge' : 'no-scholarship-badge';
+            const scholarshipText = hasScholarship ? 'Aid Available' : 'No Mention of Aid';
+            const scholarshipIcon = hasScholarship 
+                ? `<i data-lucide="award" class="w-4 h-4 mr-1.5"></i>`
+                : `<i data-lucide="x-circle" class="w-4 h-4 mr-1.5"></i>`;
+
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col';
+            card.innerHTML = `
+                <div class="p-6 flex-grow">
+                    <div class="flex justify-between items-start">
+                        <p class="text-sm font-medium text-indigo-600">${program['Extracurricular Category']}</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${scholarshipBadgeClass}">
+                            ${scholarshipIcon}
+                            ${scholarshipText}
+                        </span>
+                    </div>
+                    <h3 class="mt-2 text-xl font-semibold text-gray-900">${program['Program Name']}</h3>
+                    <div class="mt-3 space-y-2 text-sm text-gray-500">
+                        <p class="flex items-center"><i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-400"></i> ${program.City}</p>
+                        <p class="flex items-center"><i data-lucide="dollar-sign" class="w-4 h-4 mr-2 text-gray-400"></i> Cost: ${program.Cost || 'Varies'}</p>
+                        <p class="flex items-center"><i data-lucide="users" class="w-4 h-4 mr-2 text-gray-400"></i> Ages: ${program['Age Group'] || 'All'}</p>
+                    </div>
+                </div>
+                <div class="p-6 bg-gray-50 border-t">
+                    <button class="w-full view-details-btn text-indigo-600 font-semibold hover:text-indigo-800 transition-colors duration-200 flex items-center justify-center">
+                        View Details <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                    </button>
+                </div>
+            `;
+            
+            card.querySelector('.view-details-btn').addEventListener('click', () => showModal(program));
+            return card;
+        }
+
+        function showModal(program) {
+            const hasScholarship = program['Scholarship / Financial Aid Available?'] === 'Yes';
+            const scholarshipBadgeClass = hasScholarship ? 'scholarship-badge' : 'no-scholarship-badge';
+            const scholarshipText = hasScholarship ? 'Financial Aid IS Available' : 'No Financial Aid Mentioned';
+
+            modal.innerHTML = `
+                <div class="p-6 md:p-8">
+                    <div class="flex justify-between items-center pb-3 border-b">
+                        <h3 class="text-2xl font-bold text-gray-900">${program['Program Name']}</h3>
+                        <button id="close-modal-btn" class="p-1 rounded-full hover:bg-gray-200">
+                            <i data-lucide="x" class="w-6 h-6 text-gray-600"></i>
+                        </button>
+                    </div>
+                    <div class="mt-6 space-y-6">
+                        <!-- Program Info -->
+                        <div class="space-y-4">
+                            <div><span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${scholarshipBadgeClass}">${scholarshipText}</span></div>
+                            <p class="flex items-start"><i data-lucide="file-text" class="w-5 h-5 mr-4 text-indigo-500 mt-1 shrink-0"></i> <span><strong class="font-semibold text-gray-700">Notes:</strong> ${program.Notes || 'No additional notes provided.'}</span></p>
+                            <p class="flex items-start"><i data-lucide="tag" class="w-5 h-5 mr-4 text-indigo-500 mt-1 shrink-0"></i> <span><strong class="font-semibold text-gray-700">Category:</strong> ${program['Extracurricular Category']}</span></p>
+                            <p class="flex items-start"><i data-lucide="users" class="w-5 h-5 mr-4 text-indigo-500 mt-1 shrink-0"></i> <span><strong class="font-semibold text-gray-700">Ages:</strong> ${program['Age Group']}</span></p>
+                            <p class="flex items-start"><i data-lucide="dollar-sign" class="w-5 h-5 mr-4 text-indigo-500 mt-1 shrink-0"></i> <span><strong class="font-semibold text-gray-700">Cost:</strong> ${program.Cost}</span></p>
+                        </div>
+
+                        <!-- Gemini AI Tools -->
+                        <div class="border-t pt-5">
+                            <h4 class="font-semibold text-gray-800 mb-3 text-lg flex items-center"><i data-lucide="sparkles" class="w-5 h-5 mr-2 text-indigo-500"></i> AI-Powered Tools</h4>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <button id="generate-fit-btn" class="gemini-btn w-full flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md transition">✨ Get Program Benefits</button>
+                                <button id="generate-email-btn" class="gemini-btn w-full flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md transition">✨ Draft Inquiry Email</button>
+                            </div>
+                            <div id="gemini-output" class="mt-4 p-4 bg-indigo-50 rounded-lg hidden"></div>
+                        </div>
+
+                        <!-- Contact Info -->
+                        <div class="border-t pt-5">
+                            <h4 class="font-semibold text-gray-800 mb-3 text-lg">Contact Information</h4>
+                            <div class="space-y-3 text-sm">
+                                ${program['Point of Contact'] ? `<p class="flex items-center"><i data-lucide="user-circle" class="w-5 h-5 mr-3 text-gray-500"></i> ${program['Point of Contact']}</p>` : ''}
+                                ${program.Address ? `<p class="flex items-center"><i data-lucide="map-pin" class="w-5 h-5 mr-3 text-gray-500"></i> ${program.Address}, ${program.City} ${program['Zip Code']}</p>` : `<p class="flex items-center"><i data-lucide="map-pin" class="w-5 h-5 mr-3 text-gray-500"></i> ${program.City}</p>`}
+                                ${program.Email ? `<p class="flex items-center"><i data-lucide="mail" class="w-5 h-5 mr-3 text-gray-500"></i> <a href="mailto:${program.Email}" class="text-indigo-600 hover:underline">${program.Email}</a></p>` : ''}
+                                ${program['Phone Number'] ? `<p class="flex items-center"><i data-lucide="phone" class="w-5 h-5 mr-3 text-gray-500"></i> ${program['Phone Number']}</p>` : ''}
+                                ${program.Website ? `<p class="flex items-center"><i data-lucide="globe" class="w-5 h-5 mr-3 text-gray-500"></i> <a href="${program.Website}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">Visit Website</a></p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+            document.body.style.overflow = 'hidden';
+
+            // --- Event Listeners for Modal and AI buttons ---
+            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+            const fitBtn = document.getElementById('generate-fit-btn');
+            const emailBtn = document.getElementById('generate-email-btn');
+            const outputDiv = document.getElementById('gemini-output');
+
+            fitBtn.addEventListener('click', async () => {
+                fitBtn.disabled = true;
+                emailBtn.disabled = true;
+                fitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2"></i>Generating...`;
+                lucide.createIcons();
+                outputDiv.classList.remove('hidden');
+                outputDiv.innerHTML = `<div class="flex items-center justify-center p-4"><i data-lucide="loader" class="animate-spin w-6 h-6 text-indigo-500"></i><p class="ml-3">Thinking...</p></div>`;
+                lucide.createIcons();
+
+                const prompt = `You are a helpful assistant for parents. Based on these program details, generate 3-4 concise bullet points explaining the potential benefits for a child. Be encouraging. If financial aid is available, highlight that for accessibility.\n\nProgram Details:\n- Name: ${program['Program Name']}\n- Category: ${program['Extracurricular Category']}\n- Notes: ${program.Notes}\n- Ages: ${program['Age Group']}\n- Financial Aid: ${program['Scholarship / Financial Aid Available?']}`;
+                const response = await callGemini(prompt);
+                outputDiv.innerHTML = `<h5 class="font-semibold mb-2">Potential Benefits:</h5><div class="prose prose-sm max-w-none">${response.replace(/\n/g, '<br>')}</div>`;
+
+                fitBtn.disabled = false;
+                emailBtn.disabled = false;
+                fitBtn.innerHTML = `✨ Get Program Benefits`;
+            });
+
+            emailBtn.addEventListener('click', async () => {
+                fitBtn.disabled = true;
+                emailBtn.disabled = true;
+                emailBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2"></i>Generating...`;
+                lucide.createIcons();
+                outputDiv.classList.remove('hidden');
+                outputDiv.innerHTML = `<div class="flex items-center justify-center p-4"><i data-lucide="loader" class="animate-spin w-6 h-6 text-indigo-500"></i><p class="ml-3">Drafting email...</p></div>`;
+                lucide.createIcons();
+
+                const prompt = `You are a helpful assistant for parents. Draft a polite and concise email inquiring about the "${program['Program Name']}" program. The parent is interested in enrolling their child. The email should:\n1. Express interest in the program.\n2. Ask about the registration process and any key dates.\n${hasScholarship ? '3. Ask for information on how to apply for financial aid.\n' : ''}4. Keep it friendly and professional.\n\nSign the email from "A Concerned Parent".`;
+                const response = await callGemini(prompt);
+                outputDiv.innerHTML = `
+                    <h5 class="font-semibold mb-2">Generated Email Draft:</h5>
+                    <textarea id="email-draft" class="w-full h-48 p-2 border border-gray-300 rounded-md text-sm">${response}</textarea>
+                    <button id="copy-email-btn" class="mt-2 w-full sm:w-auto flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <i data-lucide="copy" class="w-4 h-4 mr-2"></i> Copy Email
+                    </button>
+                `;
+                lucide.createIcons();
+                
+                document.getElementById('copy-email-btn').addEventListener('click', (e) => {
+                    const emailText = document.getElementById('email-draft').value;
+                    copyToClipboard(emailText, e.currentTarget);
+                });
+
+                fitBtn.disabled = false;
+                emailBtn.disabled = false;
+                emailBtn.innerHTML = `✨ Draft Inquiry Email`;
+            });
+        }
+        
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function renderPrograms() {
+            programsGrid.innerHTML = '';
+            const selectedCategory = categoryFilter.value;
+            const selectedCity = cityFilter.value;
+            const selectedScholarship = scholarshipFilter.value;
+
+            const filteredPrograms = programsData.filter(program => {
+                const categoryMatch = selectedCategory === 'All Categories' || program['Extracurricular Category'] === selectedCategory;
+                const cityMatch = selectedCity === 'All Cities' || program.City === selectedCity;
+                const scholarshipMatch = selectedScholarship === 'Any' || program['Scholarship / Financial Aid Available?'] === selectedScholarship;
+                return categoryMatch && cityMatch && scholarshipMatch;
+            });
+            
+            resultsInfoDiv.textContent = `Showing ${filteredPrograms.length} of ${programsData.length} programs.`;
+
+            if (filteredPrograms.length === 0) {
+                noResultsDiv.classList.remove('hidden');
+            } else {
+                noResultsDiv.classList.add('hidden');
+                filteredPrograms.forEach(program => {
+                    const card = createProgramCard(program);
+                    programsGrid.appendChild(card);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function populateFilters() {
+            const categories = [...new Set(programsData.map(p => p['Extracurricular Category']))];
+            categories.sort().forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+
+            const cities = [...new Set(programsData.map(p => p.City).filter(c => c))];
+            cities.sort().forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                cityFilter.appendChild(option);
+            });
+        }
+        
+        function resetAllFilters() {
+            categoryFilter.value = 'All Categories';
+            cityFilter.value = 'All Cities';
+            scholarshipFilter.value = 'Any';
+            renderPrograms();
+        }
+
+        // --- Initial Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            programsData = parseCSV(csvData);
+            populateFilters();
+            renderPrograms();
+
+            categoryFilter.addEventListener('change', renderPrograms);
+            cityFilter.addEventListener('change', renderPrograms);
+            scholarshipFilter.addEventListener('change', renderPrograms);
+            resetFiltersBtn.addEventListener('click', resetAllFilters);
+        });
+    </script>
+</body>
+</html>
